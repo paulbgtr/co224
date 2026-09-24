@@ -1,0 +1,11 @@
+build/
+
+managed_components/
+
+sdkconfig
+sdkconfig.old
+
+.zed/
+.idea/
+.DS_Store
+.cache/
