@@ -1,6 +1,9 @@
+#include "esp_err.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/task.h"
+#include "measurement.h"
 #include "sensor.h"
 
 #define SDA 5
@@ -10,19 +13,11 @@
 static const char *TAG = "main";
 
 void app_main(void) {
-  sensor_init();
+  QueueHandle_t data_q = xQueueCreate(100, sizeof(measurement_t));
+  QueueHandle_t latest_q = xQueueCreate(1, sizeof(measurement_t));
 
-  for (;;) {
-    vTaskDelay(pdMS_TO_TICKS(5000));
-
-    uint16_t co2;
-    float t, rh;
-
-    if (sensor_read(&co2, &t, &rh) != ESP_OK) {
-      ESP_LOGI(TAG, "Error");
-      continue;
-    }
-
-    ESP_LOGI(TAG, "CO2: %u ppm, T: %.1f C, RH: %.1f %%", co2, t, rh);
+  if (sensor_start(data_q, latest_q) != ESP_OK) {
+    ESP_LOGE(TAG, "Sensor couldn't load");
+    return;
   }
 }
