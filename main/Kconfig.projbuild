@@ -8,4 +8,16 @@ menu "CO2 sensor"
         string "Wi-Fi password"
         default ""
 
+    config MQTT_URI
+        string "MQTT broker URI"
+        default "mqtts://xxxx.s1.eu.hivemq.cloud:8883"
+
+    config MQTT_USERNAME
+        string "MQTT username"
+        default ""
+
+    config MQTT_PASSWORD
+        string "MQTT password"
+        default ""
+
 endmenu
