@@ -4,6 +4,7 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "measurement.h"
+#include "sdkconfig.h"
 #include "sensor.h"
 #include "wifi.h"
 
@@ -14,7 +15,7 @@
 static const char *TAG = "main";
 
 void app_main(void) {
-  if (wifi_start() != ESP_OK) {
+  if (wifi_start(CONFIG_WIFI_SSID, CONFIG_WIFI_PASSWORD) != ESP_OK) {
     ESP_LOGE(TAG, "Unable to start Wi-Fi");
     return;
   }

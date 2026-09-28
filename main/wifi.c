@@ -6,6 +6,7 @@
 #include "esp_wifi.h"
 #include "freertos/event_groups.h"
 #include "nvs_flash.h"
+#include "string.h"
 
 #define CONNECTED_BIT BIT0
 
@@ -39,7 +40,7 @@ static esp_err_t init_nvs(void) {
   return err;
 }
 
-esp_err_t wifi_start(void) {
+esp_err_t wifi_start(const char *ssid, const char *password) {
   events = xEventGroupCreate();
 
   ESP_RETURN_ON_ERROR(init_nvs(), TAG, "NVS");
@@ -58,13 +59,12 @@ esp_err_t wifi_start(void) {
       TAG, "handler");
 
   wifi_config_t cfg = {
-      .sta =
-          {
-              .ssid = CONFIG_WIFI_SSID,
-              .password = CONFIG_WIFI_PASSWORD,
-              .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-          },
+      .sta.threshold.authmode = WIFI_AUTH_WPA2_PSK,
   };
+
+  strlcpy((char *)cfg.sta.ssid, ssid, sizeof cfg.sta.ssid);
+  strlcpy((char *)cfg.sta.password, password, sizeof cfg.sta.password);
+
   ESP_RETURN_ON_ERROR(esp_wifi_set_mode(WIFI_MODE_STA), TAG, "mode");
   ESP_RETURN_ON_ERROR(esp_wifi_set_config(WIFI_IF_STA, &cfg), TAG, "config");
   ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "start");
