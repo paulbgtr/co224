@@ -4,6 +4,7 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "measurement.h"
+#include "mqtt.h"
 #include "sdkconfig.h"
 #include "sensor.h"
 #include "wifi.h"
@@ -25,6 +26,9 @@ void app_main(void) {
 
   QueueHandle_t data_q = xQueueCreate(100, sizeof(measurement_t));
   QueueHandle_t latest_q = xQueueCreate(1, sizeof(measurement_t));
+
+  if (mqtt_start(data_q) != ESP_OK)
+    ESP_LOGE(TAG, "MQTT couldn't launch");
 
   if (sensor_start(data_q, latest_q) != ESP_OK) {
     ESP_LOGE(TAG, "Sensor couldn't load");
