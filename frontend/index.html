@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CO₂ Monitor</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #0ea5e9;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      text-align: center;
+      max-width: 320px;
+      width: 100%;
+    }
+
+    #status {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    #co2 {
+      font-size: 4.5rem;
+      font-weight: 700;
+      line-height: 1;
+      margin: 0 0 1rem 0;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      transition: color 0.3s ease;
+    }
+
+    #extra {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div id="status">connecting…</div>
+    <h1 id="co2">—</h1>
+    <div id="extra"></div>
+  </div>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="./config.js"></script>
+  <script>
+    const DEVICE = CONFIG.device;
+    const client = mqtt.connect(CONFIG.url, {
+      username: CONFIG.username,
+      password: CONFIG.password,
+    });
+
+    client.on("connect", () => {
+      client.subscribe(`co2/${DEVICE}/#`);
+    });
+
+    client.on("message", (topic, payload) => {
+      const text = payload.toString();
+
+      if (topic.endsWith("/status")) {
+        document.getElementById("status").textContent = "device: " + text;
+      }
+      if (topic.endsWith("/data")) {
+        const d = JSON.parse(text);
+        document.getElementById("co2").textContent = d.co2 + " ppm";
+        document.getElementById("extra").textContent = `${d.t} °C · ${d.rh} %`;
+      }
+    });
+  </script>
+</body>
+</html>
