@@ -1,4 +1,3 @@
-// mqtt.c
 #include "mqtt.h"
 #include "esp_check.h"
 #include "esp_crt_bundle.h"
