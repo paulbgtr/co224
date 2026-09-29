@@ -73,5 +73,5 @@ direct_dependencies:
 - esp-idf-lib/scd4x
 - idf
 manifest_hash: 2a49426808273b8b17751893bc750b8624bfb87908ff301f0717172edef73a87
-target: esp32s3
+target: esp32
 version: 2.0.0
