@@ -47,14 +47,20 @@ static void mqtt_task(void *arg) {
   measurement_t m;
   char payload[64];
 
-  while (1) {
+  for (;;) {
     xEventGroupWaitBits(events, CONNECTED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
     if (xQueueReceive(data_q, &m, pdMS_TO_TICKS(1000)) != pdTRUE)
       continue;
 
-    snprintf(payload, sizeof payload, "{\"co2\":%u,\"t\":%.1f,\"rh\":%.1f}",
-             m.co2, m.t, m.rh);
+    int len = snprintf(payload, sizeof payload,
+                       "{\"co2\":%u,\"t\":%.1f,\"rh\":%.1f,\"ts\":%lld}", m.co2,
+                       m.t, m.rh, (long long)m.ts);
+
+    if (len < 0 || len >= sizeof payload) {
+      ESP_LOGE(TAG, "Payload too large");
+      continue;
+    }
 
     if (esp_mqtt_client_publish(client, topic_data, payload, 0, 1, 1) < 0)
       ESP_LOGW(TAG, "Couldn't send the request, the measurement was lost");
