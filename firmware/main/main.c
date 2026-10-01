@@ -1,5 +1,6 @@
 #include "esp_err.h"
 #include "esp_log.h"
+#include "esp_netif_sntp.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -8,6 +9,7 @@
 #include "sdkconfig.h"
 #include "sensor.h"
 #include "wifi.h"
+#include <time.h>
 
 #define SDA 5
 #define SCL 6
@@ -16,6 +18,12 @@
 static const char *TAG = "main";
 
 void app_main(void) {
+  esp_sntp_config_t cfg = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
+  esp_netif_sntp_init(&cfg);
+
+  if (esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000)) == ESP_OK)
+    ESP_LOGI(TAG, "Time synchronized");
+
   if (wifi_start(CONFIG_WIFI_SSID, CONFIG_WIFI_PASSWORD) != ESP_OK) {
     ESP_LOGE(TAG, "Unable to start Wi-Fi");
     return;
