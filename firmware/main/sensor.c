@@ -6,11 +6,13 @@
 #include "i2cdev.h"
 #include "measurement.h"
 #include "scd4x.h"
+#include <time.h>
 
 #define SDA_PIN 5
 #define SCL_PIN 6
 #define PERIOD_MS 5000
 #define MAX_FAILS 5
+#define TIME_VALID_AFTER 1700000000
 
 static const char *TAG = "sensor";
 
@@ -50,7 +52,11 @@ static void sensor_task(void *arg) {
     }
     fails = 0;
 
-    ESP_LOGI(TAG, "CO2: %u ppm, T: %.1f C, RH: %.1f %%", m.co2, m.t, m.rh);
+    time_t now = time(NULL);
+    m.ts = (now > TIME_VALID_AFTER) ? now : 0;
+
+    ESP_LOGI(TAG, "CO2: %u ppm, T: %.1f C, RH: %.1f %%, TS: %d", m.co2, m.t,
+             m.rh, now);
 
     if (data_q && xQueueSend(data_q, &m, 0) != pdTRUE)
       ESP_LOGI(TAG, "Queue is full, the measurement is lost");
