@@ -41,7 +41,8 @@ static void sensor_task(void *arg) {
     esp_err_t err = scd4x_read_measurement(&dev, &m.co2, &m.t, &m.rh);
 
     if (err != ESP_OK || !is_valid(&m)) {
-      ESP_LOGW(TAG, "Bad reading (&d times)", ++fails);
+      ++fails;
+      ESP_LOGW(TAG, "Bad reading (%d times)", fails);
 
       if (fails >= MAX_FAILS) {
         ESP_LOGE(TAG, "Reinitializing the sensor");

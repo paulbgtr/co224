@@ -18,12 +18,6 @@
 static const char *TAG = "main";
 
 void app_main(void) {
-  esp_sntp_config_t cfg = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
-  esp_netif_sntp_init(&cfg);
-
-  if (esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000)) == ESP_OK)
-    ESP_LOGI(TAG, "Time synchronized");
-
   if (wifi_start(CONFIG_WIFI_SSID, CONFIG_WIFI_PASSWORD) != ESP_OK) {
     ESP_LOGE(TAG, "Unable to start Wi-Fi");
     return;
@@ -31,6 +25,12 @@ void app_main(void) {
 
   if (!wifi_wait_connected(pdMS_TO_TICKS(15000)))
     ESP_LOGW(TAG, "Wi-Fi hasn't connected yet. Connecting...");
+
+  esp_sntp_config_t cfg = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
+  esp_netif_sntp_init(&cfg);
+
+  if (esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000)) == ESP_OK)
+    ESP_LOGI(TAG, "Time synchronized");
 
   QueueHandle_t data_q = xQueueCreate(100, sizeof(measurement_t));
   QueueHandle_t latest_q = xQueueCreate(1, sizeof(measurement_t));
